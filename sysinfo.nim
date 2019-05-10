@@ -18,7 +18,7 @@ when defined(windows):
   proc getCpuGhz*(): float =
     getInt32Value(r"HKEY_LOCAL_MACHINE\HARDWARE\DESCRIPTION\System\CentralProcessor\0\~MHz").float / 1000.0
 
-  proc getFreeMemroy*(): int64 =
+  proc getFreeMemory*(): int64 =
     getMemoryInfo().AvailablePhysMem
 
 
@@ -28,4 +28,4 @@ when isMainModule:
   echo "OsVersion: ", getOsVersion()
   echo "CpuName: ", getCpuName()
   echo "CpuGhz: ", getCpuGhz(), "GHz"
-  echo "FreeMemroy: ", getFreeMemroy().float / 1024 / 1024 / 1024, "GB"
+  echo "FreeMemory: ", getFreeMemory().float / 1024 / 1024 / 1024, "GB"
