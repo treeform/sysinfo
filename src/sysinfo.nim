@@ -172,12 +172,12 @@ when defined(linux):
   proc getOsName*(): string =
     for line in readFile("/etc/os-release").split("\n"):
       if line.startsWith("NAME="):
-        return line[6..^2]
+        return line[5..^1].strip(chars={'"', '\''})
 
   proc getOsVersion*(): string =
     for line in readFile("/etc/os-release").split("\n"):
       if line.startsWith("VERSION_ID="):
-        return line[12..^2]
+        return line[11..^1].strip(chars={'"', '\''})
 
   proc getOsSerialNumber*(): string =
     readFile("/sys/devices/virtual/dmi/id/product_serial").strip()
