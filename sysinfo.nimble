@@ -1,7 +1,7 @@
 # Package
 
 version       = "0.2.1"
-author        = "treeform"
+author        = "Andre von Houck"
 description   = "System info, CPU, OS, Memory"
 license       = "MIT"
 srcDir        = "src"
