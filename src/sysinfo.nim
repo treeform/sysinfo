@@ -1,7 +1,12 @@
+import osproc, strutils
 
+proc tryParseInt(s: string): int =
+  try:
+    parseInt(s)
+  except:
+    0
 
 when defined(windows):
-  import osproc, strutils
 
   proc wmic(sub, key: string): string =
     let (outp, _) = execCmdEx("wmic " & sub & " get " & key)
@@ -35,19 +40,19 @@ when defined(windows):
     wmic("cpu", "manufacturer")
 
   proc getNumCpus*(): int =
-    parseInt wmic("computersystem", "NumberOfProcessors")
+    tryParseInt wmic("computersystem", "NumberOfProcessors")
 
   proc getNumTotalCores*(): int =
-    parseInt wmic("computersystem", "NumberOfLogicalProcessors")
+    tryParseInt wmic("computersystem", "NumberOfLogicalProcessors")
 
   proc getCpuGhz*(): float =
     parseFloat(wmic("cpu", "MaxClockSpeed")) / 1000.0
 
   proc getTotalMemory*(): uint64 =
-    uint64 parseInt wmic("computersystem", "TotalPhysicalMemory")
+    uint64 tryParseInt wmic("computersystem", "TotalPhysicalMemory")
 
   proc getFreeMemory*(): uint64 =
-    uint64 parseInt wmic("os", "FreePhysicalMemory")
+    uint64 tryParseInt wmic("os", "FreePhysicalMemory")
 
   proc getGpuName*(): string =
     wmic("path win32_VideoController", "name")
@@ -56,17 +61,16 @@ when defined(windows):
     wmic("path win32_VideoController", "DriverVersion")
 
   proc getGpuMaxFPS*(): int =
-    parseInt wmic("path win32_VideoController", "MaxRefreshRate")
-
+    tryParseInt wmic("path win32_VideoController", "MaxRefreshRate")
 
 when defined(osx):
-  import osproc, strutils, tables
+  import tables
 
   var cache = newTable[string, string]()
   proc systemProfiler(sub, key: string): string =
     if sub notin cache:
       let (outp, _) = execCmdEx("system_profiler " & sub)
-      cache[sub] = outp    
+      cache[sub] = outp
     for rawLine in cache[sub].splitLines():
       var line = rawLine.strip()
       if line.startsWith(key):
@@ -75,7 +79,7 @@ when defined(osx):
   proc systemProfilerM(sub, key: string): seq[string] =
     if sub notin cache:
       let (outp, _) = execCmdEx("system_profiler " & sub)
-      cache[sub] = outp   
+      cache[sub] = outp
     for rawLine in cache[sub].splitLines():
       var line = rawLine.strip()
       if line.startsWith(key):
@@ -92,7 +96,7 @@ when defined(osx):
 
   proc getMachineManufacturer*(): string =
     ""
-  
+
   proc getOsName*(): string =
     let (outp, _) = execCmdEx("sw_vers -productName")
     return outp.strip()
@@ -101,7 +105,7 @@ when defined(osx):
     let (outp, _) = execCmdEx("sw_vers -productVersion")
     return outp.strip()
 
-  proc getOsSerialNumber*(): string = 
+  proc getOsSerialNumber*(): string =
     systemProfiler("SPHardwareDataType", "Serial Number (system)")
 
   proc getCpuName*(): string =
@@ -109,12 +113,12 @@ when defined(osx):
 
   proc getCpuManufacturer*(): string =
     systemProfiler("SPHardwareDataType", "Processor Name: ").split(" ")[0]
-  
+
   proc getNumCpus*(): int =
-    parseInt(systemProfiler("SPHardwareDataType", "Number of Processors: "))
+    tryParseInt(systemProfiler("SPHardwareDataType", "Number of Processors: "))
 
   proc getNumTotalCores*(): int =
-    parseInt(systemProfiler("SPHardwareDataType", "Total Number of Cores: "))
+    tryParseInt(systemProfiler("SPHardwareDataType", "Total Number of Cores: "))
 
   proc getCpuGhz*(): float =
     let cpuStr = systemProfiler("SPHardwareDataType", "Processor Speed: ")
@@ -137,8 +141,8 @@ when defined(osx):
     #       return line[len(key)..^1]
     # let scaleStr = vmStat("Mach Virtual Memory Statistics: (page size of ")
     # if scaleStr != "":
-    #   let scale = uint64(parseInt(scaleStr.split(" ")[0]))
-    #   return uint64(parseInt(vmStat("Pages free:  ")[0..^2].strip())) * scale
+    #   let scale = uint64(tryParseInt(scaleStr.split(" ")[0]))
+    #   return uint64(tryParseInt(vmStat("Pages free:  ")[0..^2].strip())) * scale
 
   proc getGpuName*(): string =
     systemProfilerM("SPDisplaysDataType", "Chipset Model: ").join(", ")
@@ -147,10 +151,9 @@ when defined(osx):
     systemProfilerM("SPDisplaysDataType", "EFI Driver Version: ").join(", ")
 
   proc getGpuMaxFPS*(): int =
-    parseInt systemProfiler("SPDisplaysDataType", "UI Looks like:").split("@ ")[^1].split(" ")[0]
+    tryParseInt systemProfiler("SPDisplaysDataType", "UI Looks like:").split("@ ")[^1].split(" ")[0]
 
 when defined(linux):
-  import osproc, strutils
 
   proc cat(sub, key: string): string =
     for line in readFile(sub).split("\n"):
@@ -192,16 +195,16 @@ when defined(linux):
     readFile("/proc/cpuinfo").count("processor")
 
   proc getNumTotalCores*(): int =
-    parseInt(cat("/proc/cpuinfo", "cpu cores")) * getNumCpus()
+    tryParseInt(cat("/proc/cpuinfo", "cpu cores")) * getNumCpus()
 
   proc getCpuGhz*(): float =
     return parseFloat cat("/proc/cpuinfo", "cpu MHz")
 
   proc getTotalMemory*(): uint64 =
-    return uint64 parseInt(cat("/proc/meminfo", "MemTotal").split(" ")[0]) * 1024
+    return uint64 tryParseInt(cat("/proc/meminfo", "MemTotal").split(" ")[0]) * 1024
 
   proc getFreeMemory*(): uint64 =
-    return uint64 parseInt(cat("/proc/meminfo", "MemFree").split(" ")[0]) * 1024
+    return uint64 tryParseInt(cat("/proc/meminfo", "MemFree").split(" ")[0]) * 1024
 
   proc getGpuName*(): string =
     ""
