@@ -1,12 +1,12 @@
 import ../src/sysinfo
 
-echo "getMachineGuid: ", getMachineGuid()
+#echo "getMachineGuid: ", getMachineGuid()
 echo "getMachineModel: ", getMachineModel()
 echo "getMachineName: ", getMachineName()
 echo "getMachineManufacturer: ", getMachineManufacturer()
 echo "getOsName: ", getOsName()
 echo "getOsVersion: ", getOsVersion()
-echo "getOsSerialNumber: ", getOsSerialNumber()
+#echo "getOsSerialNumber: ", getOsSerialNumber()
 echo "getCpuName: ", getCpuName()
 echo "getCpuGhz: ", getCpuGhz(), "GHz"
 echo "getCpuManufacturer: ", getCpuManufacturer()
