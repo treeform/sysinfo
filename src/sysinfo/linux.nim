@@ -37,7 +37,7 @@ proc getOsName*(): string =
   try:
     for line in readFile("/etc/os-release").split("\n"):
       if line.startsWith("NAME="):
-        return line[6..^2]
+        return line[5..^1].strip(chars={'"', '\''})
   except:
     discard
 
@@ -45,7 +45,7 @@ proc getOsVersion*(): string =
   try:
     for line in readFile("/etc/os-release").split("\n"):
       if line.startsWith("VERSION_ID="):
-        return line[12..^2]
+        return line[11..^1].strip(chars={'"', '\''})
   except:
     discard
 
