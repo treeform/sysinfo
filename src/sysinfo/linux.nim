@@ -63,13 +63,16 @@ proc getCpuManufacturer*(): string =
 
 proc getNumCpus*(): int =
   try:
-    return readFile("/proc/cpuinfo").count("processor")
+    for line in readFile("/proc/cpuinfo").split("\n"):
+      if "physical id" in line:
+        result = max(result, tryParseInt(line.split(":", 1)[1].strip()))
+    inc result
   except:
     discard
 
 proc getNumTotalCores*(): int =
   try:
-    return tryParseInt(cat("/proc/cpuinfo", "cpu cores")) * getNumCpus()
+    return tryParseInt(cat("/proc/cpuinfo", "cpu cores"))
   except:
     discard
 
