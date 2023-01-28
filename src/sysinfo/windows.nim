@@ -44,7 +44,7 @@ proc getTotalMemory*(): uint64 =
   uint64 tryParseInt wmic("computersystem", "TotalPhysicalMemory")
 
 proc getFreeMemory*(): uint64 =
-  uint64 tryParseInt wmic("os", "FreePhysicalMemory")
+  uint64 (tryParseInt wmic("os", "FreePhysicalMemory")) * 1024
 
 proc getGpuName*(): string =
   wmic("path win32_VideoController", "name")
